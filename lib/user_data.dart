@@ -1,4 +1,0 @@
-
-
-String savedEmail = "";
-String savedPassword = "";

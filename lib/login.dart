@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'main.dart';
 import 'signup.dart';
-import 'services/sheets_service.dart';   // para ma-access yung checkLogin()
-import 'services/session_service.dart';  // ← DINAGDAG: para ma-save ang session
-
+import 'services/auth_service.dart';
 
 class TipNavApp extends StatelessWidget {
   const TipNavApp({super.key});
@@ -46,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image.asset('images/logotop.png'),                             //HERE YUNG IMAGE
+              Image.asset('images/logotop.png'), //HERE YUNG IMAGE
               const SizedBox(height: 15),
               Text(
                 "Email",
@@ -117,8 +115,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             : Icons.visibility_outlined,
                         color: Colors.black,
                       ),
-                      onPressed: () =>
-                          setState(() => _isObscured = !_isObscured),
+                      onPressed:
+                          () => setState(() => _isObscured = !_isObscured),
                     ),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
@@ -156,17 +154,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
-
-                  // ============================================
-                  // BINAGO: dinagdag ang saveSession() pagkatapos
-                  // mag-login para hindi na kailangan mag-login ulit
-                  // pag na-close at binuksan ulit ang app
-                  // ============================================
                   onPressed: () async {
-                    String email    = emailController.text.trim();
+                    String email = emailController.text.trim();
                     String password = passwordController.text.trim();
 
-                    // wag hayaang blangko
+                    // dont allow empty fields
                     if (email.isEmpty || password.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -177,26 +169,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       return;
                     }
 
-                    // show loading habang nag-che-check sa sheet
+                    // show loading while firebase checks
                     showDialog(
                       context: context,
                       barrierDismissible: false,
-                      builder: (_) => const Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFFFFBF00),
-                        ),
-                      ),
+                      builder:
+                          (_) => const Center(
+                            child: CircularProgressIndicator(
+                              color: Color(0xFFFFBF00),
+                            ),
+                          ),
                     );
 
-                    bool isValid = await checkLogin(email, password);
+                    String? error = await signIn(email, password);
 
                     Navigator.pop(context); // close loading dialog
 
-                    if (isValid) {
-                      // DINAGDAG: i-save ang session para hindi na mag-login ulit
-                      await saveSession(email);
-
-                      // go to HomePage
+                    if (error == null) {
+                      // success, firebase saves the session automatically
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -205,17 +195,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
-                            "Invalid email or password",
-                            style: TextStyle(color: Colors.red, fontSize: 18),
+                            error,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 18,
+                            ),
                           ),
                           backgroundColor: Colors.white,
                         ),
                       );
                     }
                   },
-                  // ============================================
 
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _accentColor,
@@ -234,7 +226,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              // ============================================
               const SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

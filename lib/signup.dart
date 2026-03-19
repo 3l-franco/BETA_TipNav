@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login.dart';
-import 'services/sheets_service.dart';   // ← DINAGDAG: para ma-access yung signUpUser()
+import 'services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -12,7 +12,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool _isObscured = true;           // DINAGDAG: true na ngayon para hidden by default
+  bool _isObscured = true; // hidden by default
   bool _agreeToTerms = true;
 
   final Color _bgColor = const Color(0xFF231E1F);
@@ -29,9 +29,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [        //HERE
+            children: [
+              //HERE
               Image.asset('images/logotop.png'),
               const SizedBox(height: 15),
+
               Text(
                 "Your Email Address",
                 style: TextStyle(color: _emailLabelColor, fontSize: 16),
@@ -78,8 +80,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             : Icons.visibility_outlined,
                         color: Colors.black,
                       ),
-                      onPressed: () =>
-                          setState(() => _isObscured = !_isObscured),
+                      onPressed:
+                          () => setState(() => _isObscured = !_isObscured),
                     ),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
@@ -121,13 +123,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
-
-                  // ============================================
-                  // BINAGO: dating nag-sasave lang sa savedEmail/savedPassword
-                  // ngayon nagse-send na sa Google Sheets
-                  // ============================================
                   onPressed: () async {
-                    String email    = emailController.text.trim();
+                    String email = emailController.text.trim();
                     String password = passwordController.text.trim();
 
                     // existing validations — hindi binago
@@ -151,23 +148,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       return;
                     }
 
-                    // show loading habang nag-sasave sa sheet
+                    // show loading while firebase creates the account
                     showDialog(
                       context: context,
                       barrierDismissible: false,
-                      builder: (_) => const Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFFFFBF00),
-                        ),
-                      ),
+                      builder:
+                          (_) => const Center(
+                            child: CircularProgressIndicator(
+                              color: Color(0xFFFFBF00),
+                            ),
+                          ),
                     );
 
-                    String result = await signUpUser(email, password);
+                    String? error = await signUp(email, password);
 
                     Navigator.pop(context); // close loading dialog
 
-                    if (result == "success") {
-                      // new acc. notification — same ng dati
+                    if (error == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text("Account created successfully!"),
@@ -176,7 +173,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       );
 
-                      // navigate to LoginScreen — same ng dati
                       Future.delayed(const Duration(seconds: 2), () {
                         Navigator.pushReplacement(
                           context,
@@ -185,18 +181,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         );
                       });
-
                     } else {
-                      // pag may error (existing email, no internet, etc.)
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(result),
+                          content: Text(error),
                           backgroundColor: Colors.red,
                         ),
                       );
                     }
                   },
-                  // ============================================
 
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _accentColor,

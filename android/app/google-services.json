@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "73077038645",
+    "project_id": "tipnav-d0b36",
+    "storage_bucket": "tipnav-d0b36.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:73077038645:android:a5c5ab1f35dac822a01b7c",
+        "android_client_info": {
+          "package_name": "com.example.tip_nav"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdjd3PBaOIMpid3E6x8hnMgzgmaVs36BM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

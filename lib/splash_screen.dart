@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'onboarding.dart';
 import 'main.dart';
-import 'services/session_service.dart';   // ← DINAGDAG: para ma-check kung naka-login pa
-
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,40 +11,31 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
   @override
   void initState() {
     super.initState();
 
-    // hintayin yung splash (5 seconds — same ng dati)
-    // tapos mag-check ng session bago mag-route
+    // wait 5 seconds then check if already logged in
     Timer(const Duration(seconds: 5), () {
       if (!mounted) return;
       _checkSessionAndRoute();
     });
   }
 
-
-  // --------------------------------------------------------
-  // BINAGO: dating lagi lang pumupunta sa OnboardingScreen
-  // ngayon nag-che-check muna kung naka-login na
-  //
-  // kung naka-login na  → diretso sa HomePage (skip onboarding + login)
-  // kung hindi pa       → normal flow → OnboardingScreen
-  // --------------------------------------------------------
   Future<void> _checkSessionAndRoute() async {
-    String? savedEmail = await isLoggedIn();
+    // firebase keeps the session, just check currentUser
+    User? user = FirebaseAuth.instance.currentUser;
 
     if (!mounted) return;
 
-    if (savedEmail != null) {
-      // may nakalog-in na dati — skip onboarding at login
+    if (user != null) {
+      // already logged in, skip onboarding and login
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } else {
-      // wala pang session — normal na flow
+      // no session, go through normal flow
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const OnboardingScreen()),
@@ -53,17 +43,13 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SizedBox(
         width: double.infinity,
         height: double.infinity,
-        child: Image.asset(
-          'images/TIPNaV.gif',
-          fit: BoxFit.cover,
-        ),
+        child: Image.asset('images/TIPNaV.gif', fit: BoxFit.cover),
       ),
     );
   }
