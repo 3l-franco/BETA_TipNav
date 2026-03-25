@@ -1,16 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-// handles all firebase auth stuff
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
-// get current logged in user
 User? get currentUser => _auth.currentUser;
 
-// stream - used in splash to check if logged in or not
 Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-// sign in - returns null if success, error string if failed
 Future<String?> signIn(String email, String password) async {
   try {
     await _auth.signInWithEmailAndPassword(
@@ -28,7 +24,7 @@ Future<String?> signIn(String email, String password) async {
     } else if (e.code == 'user-disabled') {
       return "This account has been disabled.";
     } else if (e.code == 'invalid-credential') {
-      // firebase combines wrong email/password into this one now
+      
       return "Invalid email or password.";
     } else {
       return "Login failed. Please try again.";
@@ -38,7 +34,6 @@ Future<String?> signIn(String email, String password) async {
   }
 }
 
-// sign up - returns null if success, error string if failed
 Future<String?> signUp(String email, String password) async {
   try {
     await _auth.createUserWithEmailAndPassword(
@@ -61,7 +56,6 @@ Future<String?> signUp(String email, String password) async {
   }
 }
 
-// sign out - firebase handles clearing the session
 Future<void> signOut() async {
   await _auth.signOut();
 }

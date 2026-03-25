@@ -9,7 +9,10 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFEDEDED),
-      body: Column(
+      body: SafeArea(
+  child: SingleChildScrollView(
+    padding: const EdgeInsets.only(bottom: 20),
+    child: Column(
         children: [
           Stack(
             clipBehavior: Clip.none,
@@ -161,6 +164,8 @@ class ProfilePage extends StatelessWidget {
           ),
         ],
       ),
+       )
+      )
     );
   }
 
